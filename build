@@ -1,0 +1,49 @@
+
+#!/bin/sh
+
+set -e
+
+# Default config
+PLATFORM="linux/arm64"
+MODE="--load"
+VARIANTS="tiny slim full"
+
+# Parse arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --platform)
+      PLATFORM="$2"
+      shift 2
+      ;;
+    --push)
+      MODE="--push"
+      shift
+      ;;
+    --load)
+      MODE="--load"
+      shift
+      ;;
+    tiny|slim|full)
+      VARIANTS="$1"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+for VARIANT in $VARIANTS; do
+  DOCKERFILE="./base/${VARIANT}.Dockerfile"
+  [ "$VARIANT" = "full" ] && DOCKERFILE="./base/Dockerfile"
+
+  echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
+  docker buildx build \
+    --platform "$PLATFORM" \
+    --secret id=github_token,env=GITHUB_TOKEN \
+    --tag lambda-shell-base:$VARIANT \
+    --file "$DOCKERFILE" \
+    $MODE \
+    ./base
+done

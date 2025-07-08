@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Setup the AWS Lambda Runtime Interface Emulator
+mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie \
+    https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie-arm64 \
+    && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
+
+# Start the Lambda shell container
+docker run \
+    -p 9000:8080 \
+    --platform linux/arm64 \
+    -v ~/.aws:/root/.aws:ro \
+    --env AWS_PROFILE=${AWS_PROFILE} \
+    --env AWS_REGION=${AWS_REGION} \
+    --volume ~/.aws-lambda-rie:/aws-lambda \
+    --entrypoint /aws-lambda/aws-lambda-rie \
+    --env HANDLER="handler.hello" \
+    lambda-shell-base:tiny \
+    /var/runtime/bootstrap
+
+# Invoke test: basic curl request
+curl -XPOST \
+    "http://localhost:9000/2015-03-31/functions/function/invocations" \
+    -d '{}'
+
+# Invoke test using http-bin
+http-bin -d '{}' \
+    "http://localhost:9000/2015-03-31/functions/function/invocations"
