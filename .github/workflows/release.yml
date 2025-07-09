@@ -26,13 +26,33 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: npm ci
-      - name: Build Docker images
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push multi-arch Docker images
         run: |
           echo "${{ secrets.GHCR_PAT }}" > github_token
-          export DOCKER_BUILDKIT=1
-          docker build --load --platform linux/arm64 --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:tiny -f tiny.Dockerfile .
-          docker build --load --platform linux/arm64 --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:slim -f slim.Dockerfile .
-          docker build --load --platform linux/arm64 --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:full -f Dockerfile .
+          docker login ghcr.io -u skunxicat --password-stdin < github_token
+          docker buildx create --use
+          docker buildx build \
+            --platform linux/arm64 \
+            --secret id=github_token,src=github_token \
+            --tag ghcr.io/ql4b/lambda-shell-runtime:tiny \
+            --file tiny.Dockerfile \
+            --push .
+          docker buildx build \
+            --platform linux/arm64 \
+            --secret id=github_token,src=github_token \
+            --tag ghcr.io/ql4b/lambda-shell-runtime:slim \
+            --file slim.Dockerfile \
+            --push .
+          docker buildx build \
+            --platform linux/arm64 \
+            --secret id=github_token,src=github_token \
+            --tag ghcr.io/ql4b/lambda-shell-runtime:full \
+            --file Dockerfile \
+            --push .
         shell: bash
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
