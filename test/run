@@ -15,7 +15,7 @@ docker run \
     --volume ~/.aws-lambda-rie:/aws-lambda \
     --entrypoint /aws-lambda/aws-lambda-rie \
     --env HANDLER="handler.hello" \
-    lambda-shell-runtime:tiny \
+    lambda-shell-runtime:debug-tiny \
     /var/runtime/bootstrap
 
 # Invoke test: basic curl request

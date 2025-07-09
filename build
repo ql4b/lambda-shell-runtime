@@ -35,8 +35,8 @@ while [ $# -gt 0 ]; do
 done
 
 for VARIANT in $VARIANTS; do
-  DOCKERFILE="./base/${VARIANT}.Dockerfile"
-  [ "$VARIANT" = "full" ] && DOCKERFILE="./base/Dockerfile"
+  DOCKERFILE="./${VARIANT}.Dockerfile"
+  [ "$VARIANT" = "full" ] && DOCKERFILE="./Dockerfile"
 
   echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
   docker buildx build \
@@ -45,5 +45,5 @@ for VARIANT in $VARIANTS; do
     --tag lambda-shell-runtime:$VARIANT \
     --file "$DOCKERFILE" \
     $MODE \
-    ./base
+    .
 done
