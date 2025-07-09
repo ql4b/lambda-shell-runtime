@@ -34,6 +34,8 @@ jobs:
           docker build --load --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:slim -f slim.Dockerfile .
           docker build --load --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:full -f Dockerfile .
         shell: bash
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
