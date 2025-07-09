@@ -47,6 +47,7 @@ for VARIANT in $VARIANTS; do
 
   echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
   docker buildx build \
+    --no-cache \
     --platform "$PLATFORM" \
     --secret id=github_token,env=GITHUB_TOKEN \
     --tag $TAG:$VARIANT \
