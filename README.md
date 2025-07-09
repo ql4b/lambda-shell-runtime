@@ -18,13 +18,13 @@ Each runtime variant has its own Dockerfile:
 
 ```bash
 # Build tiny
-docker build -f tiny.Dockerfile -t lambda-shell-base:tiny .
+docker build -f tiny.Dockerfile -t lambda-shell-runtime:tiny .
 
 # Build slim
-docker build -f slim.Dockerfile -t lambda-shell-base:slim .
+docker build -f slim.Dockerfile -t lambda-shell-runtime:slim .
 
 # Build full
-docker build -f Dockerfile -t lambda-shell-base:full .
+docker build -f Dockerfile -t lambda-shell-runtime:full .
 ```
 
 ## Usage
@@ -32,7 +32,7 @@ docker build -f Dockerfile -t lambda-shell-base:full .
 To use this runtime in your own Lambda container image:
 
 ```Dockerfile
-FROM ghcr.io/ql4b/lambda-shell-base:tiny
+FROM ghcr.io/ql4b/lambda-shell-runtime:tiny
 
 WORKDIR /var/task
 
@@ -51,7 +51,7 @@ docker run -d \
   -p 9000:8080 \
   --env HANDLER="handler.hello" \
   --entrypoint /aws-lambda/aws-lambda-rie \
-  lambda-shell-base:tiny \
+  lambda-shell-runtime:tiny \
   /var/runtime/bootstrap
 
 curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'

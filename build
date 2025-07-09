@@ -42,7 +42,7 @@ for VARIANT in $VARIANTS; do
   docker buildx build \
     --platform "$PLATFORM" \
     --secret id=github_token,env=GITHUB_TOKEN \
-    --tag lambda-shell-base:$VARIANT \
+    --tag lambda-shell-runtime:$VARIANT \
     --file "$DOCKERFILE" \
     $MODE \
     ./base
