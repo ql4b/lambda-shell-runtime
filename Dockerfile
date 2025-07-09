@@ -35,6 +35,8 @@ COPY --from=builder /aws-cli /usr/local/aws-cli
 # Copy http-cli
 COPY --from=builder /http-cli-bin/http-cli /var/task/bin/http-cli
 
+ENV PATH="/var/task/bin:${PATH}"
+
 COPY runtime/bootstrap /var/runtime/bootstrap
 RUN chmod +x /var/runtime/bootstrap
 
