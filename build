@@ -6,13 +6,19 @@ set -e
 # Default config
 PLATFORM="linux/arm64"
 MODE="--load"
+TAG="lambda-shell-runtime"
 VARIANTS="tiny slim full"
+
 
 # Parse arguments
 while [ $# -gt 0 ]; do
   case "$1" in
     --platform)
       PLATFORM="$2"
+      shift 2
+      ;;
+    --tag)
+      TAG="$2"
       shift 2
       ;;
     --push)
@@ -42,7 +48,7 @@ for VARIANT in $VARIANTS; do
   docker buildx build \
     --platform "$PLATFORM" \
     --secret id=github_token,env=GITHUB_TOKEN \
-    --tag lambda-shell-runtime:$VARIANT \
+    --tag $TAG:$VARIANT \
     --file "$DOCKERFILE" \
     $MODE \
     .
