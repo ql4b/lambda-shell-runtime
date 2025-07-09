@@ -18,6 +18,31 @@ docker run \
     lambda-shell-runtime:debug-tiny \
     /var/runtime/bootstrap
 
+docker run \
+    -p 9000:8080 \
+    --platform linux/arm64 \
+    -v ~/.aws:/root/.aws:ro \
+    --env AWS_PROFILE=${AWS_PROFILE} \
+    --env AWS_REGION=${AWS_REGION} \
+    --volume ~/.aws-lambda-rie:/aws-lambda \
+    --entrypoint /aws-lambda/aws-lambda-rie \
+    --env HANDLER="handler.hello" \
+    lambda-shell-runtime:debug-tiny \
+    /var/runtime/bootstrap
+
+
+docker run -d --rm \
+    -p 9000:8080 \
+    --platform linux/arm64 \
+    -v ~/.aws:/root/.aws:ro \
+    --volume ~/.aws-lambda-rie:/aws-lambda \
+    --entrypoint /aws-lambda/aws-lambda-rie \
+    --env HANDLER="handler.hello" \
+    lambda-shell-runtime:micro \
+    /var/runtime/bootstrap
+
+
+
 # Invoke test: basic curl request
 curl -XPOST \
     "http://localhost:9000/2015-03-31/functions/function/invocations" \
