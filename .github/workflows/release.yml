@@ -26,6 +26,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - run: npm ci
+      - name: Build Docker images
+        run: |
+          echo "${{ secrets.GHCR_PAT }}" > github_token
+          export DOCKER_BUILDKIT=1
+          docker build --progress=plain --secret id=github_token,src=github_token -t lambda-shell-base:tiny -f tiny.Dockerfile .
+          docker build --progress=plain --secret id=github_token,src=github_token -t lambda-shell-base:slim -f slim.Dockerfile .
+          docker build --progress=plain --secret id=github_token,src=github_token -t lambda-shell-base:full -f Dockerfile .
+        shell: bash
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
