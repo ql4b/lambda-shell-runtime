@@ -6,9 +6,10 @@ VERSION="$1"
 echo "Publishing Docker images with version $VERSION"
 
 for VARIANT in tiny slim full; do
-  IMAGE="ghcr.io/ql4b/lambda-shell-base:$VARIANT"
-  docker tag lambda-shell-base:$VARIANT "$IMAGE:$VERSION"
-  docker tag lambda-shell-base:$VARIANT "$IMAGE:latest"
-  docker push "$IMAGE:$VERSION"
-  docker push "$IMAGE:latest"
+  BASE_IMAGE="ghcr.io/ql4b/lambda-shell-base"
+  TAG="$VERSION-$VARIANT"
+  docker tag lambda-shell-base:$VARIANT "$BASE_IMAGE:$TAG"
+  docker tag lambda-shell-base:$VARIANT "$BASE_IMAGE:$VARIANT-latest"
+  docker push "$BASE_IMAGE:$TAG"
+  docker push "$BASE_IMAGE:$VARIANT-latest"
 done
