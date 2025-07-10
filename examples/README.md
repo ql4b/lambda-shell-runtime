@@ -3,13 +3,15 @@
 ## buld 
 
 ```bash
-CONTAINER="shell-booking"
+# CONTAINER="shell-booking"
 # TAG="shell-booking:dev"
-TAG="703177223665.dkr.ecr.eu-central-1.amazonaws.com/ql4b-farecrumbs:booking"
+# TAG="703177223665.dkr.ecr.eu-central-1.amazonaws.com/ql4b-farecrumbs:booking"
+CONTAINER="rrlelay"
+TAG="rrlelay:dev"
+
 
 b () {
     docker build \
-    --no-cache \
     --platform linux/arm64  \
     -t "$TAG"  \
     --secret id=github_token,env=GITHUB_TOKEN \
@@ -23,6 +25,7 @@ r () {
         --platform linux/arm64 \
         -v ~/.aws:/root/.aws:ro \
         --volume ~/.aws-lambda-rie:/aws-lambda \
+        --volume ./rrelay.sh:/var/task/hander.sh:rw \
         --entrypoint /aws-lambda/aws-lambda-rie \
         --env HANDLER="handler.booking" \
         "$TAG" \

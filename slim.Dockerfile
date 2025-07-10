@@ -38,6 +38,6 @@ RUN chmod +x /var/runtime/bootstrap
 
 WORKDIR /var/task
 
-COPY functions/handler.sh handler.sh
+COPY task/handler.sh handler.sh
 
 

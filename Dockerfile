@@ -32,10 +32,6 @@ RUN dnf install -y jq python3 python3-libs  && \
 COPY --from=builder /aws-cli-bin/aws /usr/local/bin/aws
 COPY --from=builder /aws-cli /usr/local/aws-cli
 
-# Fix Python shared library path for AWS CLI v2
-RUN find /usr -name "libpython3*.so*" -exec cp {} /usr/local/bin/ \; 2>/dev/null || true
-
-
 # Copy http-cli
 COPY --from=builder /http-cli-bin/http-cli /var/task/bin/http-cli
 
@@ -46,4 +42,4 @@ RUN chmod +x /var/runtime/bootstrap
 
 WORKDIR /var/task
 
-COPY functions/handler.sh handler.sh
+COPY task/handler.sh handler.sh

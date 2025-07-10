@@ -10,7 +10,6 @@ TAG="lambda-shell-runtime"
 # VARIANTS="tiny slim full"
 VARIANTS="tiny micro"
 
-
 # Parse arguments
 while [ $# -gt 0 ]; do
   case "$1" in

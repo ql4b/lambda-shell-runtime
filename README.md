@@ -6,26 +6,57 @@ Implement AWS Lambda functions in Bash, packaged as OCI-compliant container imag
 
 Inspired by: https://docs.aws.amazon.com/lambda/latest/dg/runtimes-walkthrough.html
 
-## Runtime Variants
+
+This custom Lambda runtime enables Bash-based execution with minimal dependencies. We provide three image variants tailored to different needs:
+
+## Runtime Image Variants
+
+### 1. `tiny`
+- Includes: `jq`, `curl`
+- Use case: Lightweight data parsing and HTTP requests.
+
+### 2. `micro`
+- Based on: `tiny`
+- Adds: `awscurl`
+- Use case: AWS API calls using IAM credentials without full AWS CLI.
+
+### 3. `full`
+- Based on: `tiny`
+- Adds: **full AWS CLI** (official install)
+- Use case: Complete access to AWS CLI features.
+- Note: Previously experimented with intermediate setups (e.g., stripped-down AWS CLI), but they proved unstable. This variant now uses the official, standard installation of the AWS CLI.
+
+---
+
+Each image is built from the same base but optimized for different tasks. You can choose the right variant for your Lambda depending on the environment and tools required.
 
 Each runtime variant has its own Dockerfile:
 
-- `tiny`: [`jq`](https://stedolan.github.io/jq/) + [`http-cli`](https://github.com/ql4b/http-cli)
-- `slim`: same as `tiny` + AWS CLI v1
-- `full`: same as `slim` + AWS CLI v2
+## Local build process
 
-### Build locally
+To run the script locally:
 
-```bash
-# Build tiny
-docker build -f tiny.Dockerfile -t lambda-shell-runtime:tiny .
-
-# Build slim
-docker build -f slim.Dockerfile -t lambda-shell-runtime:slim .
-
-# Build full
-docker build -f Dockerfile -t lambda-shell-runtime:full .
 ```
+./build --platform linux/arm64 --tag your-repo/lambda-shell --load micro
+```
+
+```
+./build --platform linux/arm64 --tag your-repo/lambda-shell --push micro
+```
+
+Key Features:
+
+* Platform targeting: Defaults to linux/arm64, which is suitable for AWS Lambda ARM-based functions.
+* Variants: You can build one or more of the supported variants: tiny, micro, or full.
+* Secrets: Supports injecting a GitHub token via --secret id=github_token,env=GITHUB_TOKEN for private dependency access during build.
+
+Modes:
+* `--load` (default): Loads the image into the local Docker engine.
+* `--push`: Pushes the image to a remote registry.
+
+## GitHub Actions Build
+
+In a GitHub Actions environment, the build script is typically used in combination with Docker Buildx and secrets configured in the CI pipeline.
 
 ## Usage
 
