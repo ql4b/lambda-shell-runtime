@@ -7,7 +7,6 @@ echo $request >&2
 correlation_id=$(uuidgen | tr '[:upper:]' '[:lower:]')
 # export USER_AGENT=$(randua)
 
-
 departureDate=$(echo "$request" | jq -r '.dateOut +"T00:00:00.000"')
 # echo "$departureDate" >&2
 
