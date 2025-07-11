@@ -149,43 +149,41 @@ function create_basket () {
 
 function create_booking () {
     local variables=$(echo "$1" | jq -c)
-    # {
-    #     "basketId": "2f3e14fa-c78a-4906-b021-d5ee4222e0db",
-    #     "createBooking": {
-    #         "adults": 1,
-    #         "children": 0,
-    #         "infants": 0,
-    #         "teens": 0,
-    #         "flights": [
-    #         {
-    #             "fareKey": "2FGVMXHMTBPQ73LTTFGTOXOWCG23NTHUGQ7TCVFLESZKDQLXBEM7ENS336VRY76Z6HBQD7JC5UCFVDAM7CXNPGZCKD3A6SSQQLKOLF7HAGIG2KXSIVBQUBOWNEJOWJ7SE3KKZ3QV6LNPMI3KHKU5CE62TOJBWMEITNYPFA7ICELQJXW2RHBE6IGSIQDKHERC35QRM67MAHVXOLBXQNXPL7WOZPYQNG4L3YIUWW6KFRBJGON3QLUYETUFHICGF7PKYLA6Y7QIREYGGRZWDOYDFQJLJHDZ4AHEHHUZ7LAGXQHRNOAU4JMCABKRO4DED2HTJYP2HHQQOASYRENHOQ26SCMY43Q445DNVOPMB2A",
-    #             "flightKey": "FR~7763~ ~~ALC~10/10/2025 14:30~DUB~10/10/2025 16:25~~",
-    #             "fareOption": null
-    #         }
-    #         ],
-    #         "discount": 0,
-    #         "promoCode": ""
-    #     },
-    #     "culture": "it-it"
-    # }
     local url="https://www.ryanair.com/api/basketapi/it-it/graphql"
     local m_create_booking='{"query":"mutation CreateBooking($basketId: String, $createBooking: CreateBookingInput!, $culture: String!) {\n  createBooking(basketId: $basketId, createBooking: $createBooking, culture: $culture) {\n    ...BasketCommon\n  }\n}\n\n\nfragment TotalCommon on PriceType {\n  total\n}\n\nfragment PriceCommon on PriceType {\n  amountWithTaxes\n  total\n  discount\n  discountCode\n}\n\nfragment ComponentCommon on ComponentType {\n  id\n  parentId\n  code\n  type\n  quantity\n  removable\n  hidden\n  price {\n    ...PriceCommon\n  }\n}\n\nfragment VariantUnionAddOn on VariantUnionType {\n  ... on AddOn {\n    itemId\n    provider\n    paxNumber\n    pax\n    src\n    start\n    end\n  }\n}\n\nfragment VariantUnionFare on VariantUnionType {\n  ... on Fare {\n    fareOption\n    journeyNumber\n  }\n}\n\nfragment VariantUnionSsr on VariantUnionType {\n  ... on Ssr {\n    journeyNumber\n    paxNumber\n    segmentNumber\n  }\n}\n\nfragment VariantUnionSeat on VariantUnionType {\n  ... on Seat {\n    paxNumber\n    journeyNumber\n    segmentNumber\n    seatType\n    designator\n    childSeatsWithAdult\n    hasAdditionalSeatCost\n    primeIncluded\n  }\n}\n\nfragment VariantUnionBundle on VariantUnionType {\n  ... on Bundle {\n    journeyNumber\n    segmentNumber\n  }\n}\n\nfragment VariantUnionParkingAddOn on VariantUnionType {\n  ... on ParkingAddOn {\n    carParkName\n    itemId\n    provider\n    paxNumber\n    pax\n    src\n    start\n    end\n  }\n}\n\nfragment VariantUnionVoucher on VariantUnionType {\n  ... on Voucher {\n    firstName\n    lastName\n    email\n  }\n}\n\nfragment VariantUnionPhysicalVoucher on VariantUnionType {\n  ... on PhysicalVoucher {\n    sequenceNumber\n    firstName\n    lastName\n    address1\n    address2\n    city\n    postalCode\n    country\n    countryName\n    scheduleDate\n    message\n  }\n}\n\nfragment VariantUnionDigitalVoucher on VariantUnionType {\n  ... on DigitalVoucher {\n    sequenceNumber\n    firstName\n    lastName\n    email\n    theme\n    scheduleDate\n    scheduleTime\n    message\n  }\n}\n\nfragment VariantUnionPhysicalVoucherShippingAddress on VariantUnionType {\n  ... on PhyscialVoucherShippingAddress {\n    address1\n    address2\n    city\n    postalCode\n    country\n    countryName\n    firstName\n    lastName\n  }\n}\n\nfragment VariantUnionChangePaxType on VariantUnionType {\n  ... on ChangePassengerType {\n    passengerNumber\n    invalidJourneys {\n      journeyNumber\n      passengers {\n        passengerNumber\n        passengerType\n      }\n    }\n    mandatorySeatPricesWithoutDiscount {\n      journeyNumber\n      passengerNumber\n      feePriceWithoutDiscount\n      cost\n    }\n  }\n}\n\nfragment VariantUnionAddInfant on VariantUnionType {\n  ... on AddInfant {\n    journeyNumber\n    invalidPassengers {\n      passengerNumber\n      passengerType\n    }\n    segmentNumber\n    paxNumber\n  }\n}\n\nfragment VariantGroundTransfer on VariantUnionType {\n  ... on GroundTransfer {\n    locationPickUp\n    locationDropOff\n    routeType\n    startDate\n    endDate\n    itemId\n    location\n  }\n}\n\nfragment GettingTherePillar on GettingThereType {\n  isPrime\n  price {\n    ...TotalCommon\n  }\n  journeys {\n    ... on JourneyType {\n      arrival\n      departure\n      destination\n      duration\n      fareClass\n      fareKey\n      fareOption\n      flightKey\n      flightNumber\n      isConnecting\n      isDomestic\n      journeyNum\n      origin\n      changeInfo {\n        ... on ChangeInfoType {\n          isChangeable\n          freeMove\n          isChanged\n        }\n      }\n      segments {\n        ... on SegmentType {\n          aircraft\n          arrival\n          departure\n          destination\n          duration\n          hasGovernmentTax\n          flightNumber\n          segmentNum\n          origin\n          originCountry\n          destinationCountry\n        }\n      }\n    }\n  }\n  discounts {\n    ... on DiscountType {\n      amount\n      code\n      journeyNum\n      percentage\n      zone\n      description\n      qty\n    }\n  }\n  taxes {\n    ... on TaxType {\n      amount\n      code\n      journeyNum\n      percentage\n      zone\n    }\n  }\n  vouchers {\n    ... on VoucherType {\n      amount\n      code\n      status\n      accountNumber\n      voucherBasisCode\n    }\n  }\n  components {\n    ... on ComponentType {\n      ...ComponentCommon\n      variant {\n        ...VariantUnionAddOn\n        ...VariantUnionFare\n        ...VariantUnionSsr\n        ...VariantUnionSeat\n        ...VariantGroundTransfer\n        ...VariantUnionBundle\n        ...VariantUnionParkingAddOn\n        ...VariantUnionVoucher\n        ...VariantUnionDigitalVoucher\n        ...VariantUnionPhysicalVoucher\n        ...VariantUnionPhysicalVoucherShippingAddress\n        ...VariantUnionChangePaxType\n        ...VariantUnionAddInfant\n      }\n    }\n  }\n  messages {\n    ... on MessageType {\n      type\n      journeyNum\n      key\n      message\n    }\n  }\n}\n\nfragment PayLaterCommon on PriceType {\n  total\n}\n\nfragment BasketCommon on BasketType {\n  id\n  tripId\n  dotrezSessionId\n  currency\n  gettingThere {\n    ...GettingTherePillar\n  }\n  price {\n    ...TotalCommon\n  }\n  payLater {\n    ...PayLaterCommon\n  }\n  totalToPay\n}\n\n","variables":{"basketId":"2f3e14fa-c78a-4906-b021-d5ee4222e0db","createBooking":{"adults":1,"children":0,"infants":0,"teens":0,"flights":[{"fareKey":"2FGVMXHMTBPQ73LTTFGTOXOWCG23NTHUGQ7TCVFLESZKDQLXBEM7ENS336VRY76Z6HBQD7JC5UCFVDAM7CXNPGZCKD3A6SSQQLKOLF7HAGIG2KXSIVBQUBOWNEJOWJ7SE3KKZ3QV6LNPMI3KHKU5CE62TOJBWMEITNYPFA7ICELQJXW2RHBE6IGSIQDKHERC35QRM67MAHVXOLBXQNXPL7WOZPYQNG4L3YIUWW6KFRBJGON3QLUYETUFHICGF7PKYLA6Y7QIREYGGRZWDOYDFQJLJHDZ4AHEHHUZ7LAGXQHRNOAU4JMCABKRO4DED2HTJYP2HHQQOASYRENHOQ26SCMY43Q445DNVOPMB2A","flightKey":"FR~7763~ ~~ALC~10/10/2025 14:30~DUB~10/10/2025 16:25~~","fareOption":null}],"discount":0,"promoCode":""},"culture":"it-it"},"operationName":"CreateBooking"}'
     local data=$(
         jq -rcn  --arg m_create_booking "$m_create_booking" '$m_create_booking|fromjson' \
         | jq -rc --arg variables "$variables" '. + { variables: $variables|fromjson }'
     )
-    local output=$(http-cli \
+    local headers_file=$(mktemp)
+    local response=$(http-cli \
         --silent \
         --user-agent "$ua" \
         --header 'accept: application/json, text/plain, */*' \
         --cookie "fr-correlation-id=$correlation_id" \
         --data "$data" \
         --url "$url" \
-        -- -D "$JWT_HANDLER"
+        -D "$headers_file" \
+        -D code
     )
-    export JWT=$(cat "$JWT_HANDLER" | grep 'jwt' | awk '{ print $2 }')
-    echo "$output" | jq 
-    # echo "$JWT" >&2
+
+    # echo "$response" >&2
+    code=$(echo "$response" | grep '^server=' | cut -d '=' -f2)
+
+    if [[ $code -ne 200 ]];then 
+        echo "error" >&2
+        echo "$response" >&2
+        exit 1
+    fi
+
+    local jwt=$(cat "$headers_file" | grep '^jwt: ' | cut -d ' ' -f2)
+    local body=$(echo "$response" | grep -v "^server=" | grep -v "^proxy=" | jq )
+    
+    local output=$(jq -n --arg jwt "$jwt" --argjson body "$body" '{
+        body: $body ,
+        jwt: $jwt
+    }')
+    echo "$output"
 }
 
 function commit_booking () {

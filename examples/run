@@ -2,7 +2,7 @@
 
 source $(realpath $(dirname $0))/rrelay.sh
 
-request='{"adults":1,"children":1,"infants":1,"teens":0,"origin":"NAP","destination":"BCN","dateOut":"2025-07-13"}'
+request='{"adults":2,"children":1,"infants":0,"teens":0,"origin":"FCO","destination":"CTA","dateOut":"2025-07-15"}'
 echo $request >&2
 correlation_id=$(uuidgen | tr '[:upper:]' '[:lower:]')
 # export USER_AGENT=$(randua)
@@ -22,9 +22,17 @@ culture=$(dashed_market "$market")
 # echo "$culture" >&2
 variables=$(booking_variables "$basketID" "$request" "$flight")
 # echo "$variables" | jq >&2
-export JWT_HANDLER=$(mktemp)
-create_booking "$variables" 
-echo "$JWT" >&2
+booking=$(create_booking "$variables")
+
+if [ $? -ne 0 ]; then
+    echo "Error creating booking: $booking" >&2
+    exit 1
+fi
+export JWT=$(echo "$booking" | jq -r .jwt)
+data=$(echo "$booking" | jq -r .body)
+echo "$data | jq '.data.createBooking|{ currency, price }'"
+
+# echo "$JWT" >&2
 booking=$(commit_booking "$basketID" | jq  .data.commitBooking)
 echo "$booking" | jq >&2
 data=$(catalog_products "$basketID" "$JWT")
