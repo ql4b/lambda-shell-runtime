@@ -5,7 +5,7 @@ VERSION="$1"
 
 echo "Publishing Docker images with version $VERSION"
 
-for VARIANT in tiny slim full; do
+for VARIANT in tiny micro full; do
   BASE_IMAGE="ghcr.io/ql4b/lambda-shell-runtime"
   TAG="$VERSION-$VARIANT"
   docker tag lambda-shell-runtime:$VARIANT "$BASE_IMAGE:$TAG"
