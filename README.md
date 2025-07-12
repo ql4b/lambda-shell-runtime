@@ -12,7 +12,7 @@ This custom Lambda runtime enables Bash-based execution with minimal dependencie
 ## Runtime Image Variants
 
 ### 1. `tiny`
-- Includes: `jq`, `curl`
+- Includes: `jq`, `curl`, `http-cli`
 - Use case: Lightweight data parsing and HTTP requests.
 
 ### 2. `micro`
