@@ -36,8 +36,7 @@ jobs:
           export DOCKER_BUILDKIT=1
           docker buildx build --builder default --platform linux/arm64 --output type=docker --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:tiny -f tiny.Dockerfile .
           docker buildx build --builder default --platform linux/arm64 --output type=docker --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:micro -f micro.Dockerfile .
-          # docker buildx build --builder default --platform linux/arm64 --output type=docker --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:slim -f slim.Dockerfile .
-          # docker buildx build --builder default --platform linux/arm64 --output type=docker --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:full -f Dockerfile .
+          docker buildx build --builder default --platform linux/arm64 --output type=docker --progress=plain --secret id=github_token,src=github_token -t lambda-shell-runtime:full -f Dockerfile .
         shell: bash
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin

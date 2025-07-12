@@ -7,8 +7,7 @@ set -e
 PLATFORM="linux/arm64"
 MODE="--load"
 TAG="lambda-shell-runtime"
-# VARIANTS="tiny slim full"
-VARIANTS="tiny micro"
+VARIANTS="tiny micro full"
 
 # Parse arguments
 while [ $# -gt 0 ]; do
@@ -46,7 +45,6 @@ for VARIANT in $VARIANTS; do
 
   echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
   docker buildx build \
-    --no-cache \
     --platform "$PLATFORM" \
     --secret id=github_token,env=GITHUB_TOKEN \
     --tag $TAG:$VARIANT \

@@ -3,11 +3,12 @@ FROM public.ecr.aws/lambda/provided:al2023 AS builder
 
 RUN dnf install -y unzip && \
     dnf clean all
-# Install AWS CLI v2 (minimal installation)
-RUN curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o awscliv2.zip && \
-    unzip awscliv2.zip && \
-    ./aws/install --bin-dir /aws-cli-bin --install-dir /aws-cli && \
-    rm -rf aws awscliv2.zip
+
+# # Install AWS CLI v2 (official installation)
+# RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip" && \
+#     unzip awscliv2.zip && \
+#     ./aws/install && \
+#     rm -rf awscliv2.zip aws
 
 # Download http-cli
 RUN --mount=type=secret,id=github_token \
@@ -24,13 +25,15 @@ RUN --mount=type=secret,id=github_token \
 FROM public.ecr.aws/lambda/provided:al2023
 
 # Install only runtime dependencies
-RUN dnf install -y jq python3 python3-libs  && \
+RUN dnf install -y \
+    jq \
+    aws-cli  && \
     dnf clean all && \
     rm -rf /var/cache/dnf
 
 # Copy AWS CLI binaries only
-COPY --from=builder /aws-cli-bin/aws /usr/local/bin/aws
-COPY --from=builder /aws-cli /usr/local/aws-cli
+# COPY --from=builder /usr/local/bin/aws /usr/local/bin/aws
+# COPY --from=builder /usr/local/aws-cli /usr/local/aws-cli
 
 # Copy http-cli
 COPY --from=builder /http-cli-bin/http-cli /var/task/bin/http-cli
