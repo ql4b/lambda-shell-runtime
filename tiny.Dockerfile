@@ -1,12 +1,14 @@
 FROM public.ecr.aws/lambda/provided:al2023 AS builder
 
+ARG HTTP_CLI_VERSION=v1.0.1
+
 RUN dnf install -y unzip && \
     dnf clean all
 
 # Download http-cli
 RUN --mount=type=secret,id=github_token \
     curl -H "Authorization: token $(cat /run/secrets/github_token)" \
-    -L https://github.com/ql4b/http-cli/archive/refs/heads/develop.zip \
+    -L "https://github.com/ql4b/http-cli/archive/refs/tags/${HTTP_CLI_VERSION}.zip" \
     -o http-cli.zip && \
     unzip http-cli.zip && \
     mkdir -p /http-cli-bin && \
