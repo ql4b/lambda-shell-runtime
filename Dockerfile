@@ -19,9 +19,9 @@ RUN --mount=type=secret,id=github_token \
     -o http-cli.zip && \
     unzip http-cli.zip && \
     mkdir -p /http-cli-bin && \
-    mv http-cli-develop/http-cli /http-cli-bin/ && \
+    mv http-cli-${HTTP_CLI_VERSION#v}/http-cli /http-cli-bin/ && \
     chmod +x /http-cli-bin/http-cli && \
-    rm -rf http-cli.zip http-cli-develop
+    rm -rf http-cli.zip http-cli-${HTTP_CLI_VERSION#v}
 
 # Stage 2: Runtime stage
 FROM public.ecr.aws/lambda/provided:al2023
