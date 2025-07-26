@@ -12,9 +12,9 @@ RUN --mount=type=secret,id=github_token \
     -o http-cli.zip && \
     unzip http-cli.zip && \
     mkdir -p /http-cli-bin && \
-    mv http-cli-develop/http-cli /http-cli-bin/ && \
+    mv http-cli-${HTTP_CLI_VERSION#v}/http-cli /http-cli-bin/ && \
     chmod +x /http-cli-bin/http-cli && \
-    rm -rf http-cli.zip http-cli-develop
+    rm -rf http-cli.zip http-cli-${HTTP_CLI_VERSION#v}
 
 RUN pip3 install --no-cache-dir --target /tmp/awscurl awscurl && \
     find /tmp/awscurl -type d -name '__pycache__' -exec rm -rf {} + && \
