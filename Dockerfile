@@ -48,3 +48,4 @@ RUN chmod +x /var/runtime/bootstrap
 WORKDIR /var/task
 
 COPY task/handler.sh handler.sh
+COPY task/helpers.sh helpers.sh
