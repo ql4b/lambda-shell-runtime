@@ -1,0 +1,34 @@
+name: Publish to ECR Public
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to ECR Public
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+
+      - name: Build and push variants
+        run: |
+          for variant in tiny micro full; do
+            docker buildx build \
+              --platform linux/arm64,linux/amd64 \
+              --target $variant \
+              --secret id=github_token,env=GITHUB_TOKEN \
+              --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:$variant \
+              --push \
+              .
+          done

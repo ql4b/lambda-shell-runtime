@@ -68,6 +68,8 @@ jobs:
             echo "SHOULD_RELEASE=false" >> $GITHUB_ENV
           fi
           echo "Detected VERSION: $VERSION"
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
       - name: Build and push images
         run: |
           echo "${{ secrets.GHCR_PAT }}" > github_token
