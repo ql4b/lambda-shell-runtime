@@ -54,12 +54,12 @@ jobs:
           VERSION=$(npx semantic-release --no-ci --dry-run 2>&1 | tee semantic-output.log | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+' || true)
 
           if [ -z "$VERSION" ]; then
-            echo "❌ Failed to extract VERSION from semantic-release output:"
+            echo "Failed to extract VERSION from semantic-release output:"
             cat semantic-output.log
             exit 1
           fi
 
-          echo "✅ Detected VERSION: $VERSION"
+          echo "Detected VERSION: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Build Docker images
         run: |              
@@ -71,7 +71,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
             --output type=registry --progress=plain \
-            --secret id=github_token,env=GITHUB_TOKEN \
+            --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:base-$VERSION \
@@ -81,7 +81,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
             --output type=registry --progress=plain \
-            --secret id=github_token,env=GITHUB_TOKEN \
+            --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:tiny-$VERSION \
@@ -91,7 +91,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
             --output type=registry --progress=plain \
-            --secret id=github_token,env=GITHUB_TOKEN \
+            --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:micro-$VERSION \
@@ -101,7 +101,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
             --output type=registry --progress=plain \
-            --secret id=github_token,env=GITHUB_TOKEN \
+            --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:full-$VERSION \
