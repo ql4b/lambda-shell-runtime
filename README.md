@@ -62,7 +62,7 @@ In a GitHub Actions environment, the build script is typically used in combinati
 To use this runtime in your own Lambda container image:
 
 ```Dockerfile
-FROM ghcr.io/ql4b/lambda-shell-runtime:tiny
+FROM public.ecr.aws/j5r7n1v7/lambda-shell-runtime:tiny
 
 WORKDIR /var/task
 
