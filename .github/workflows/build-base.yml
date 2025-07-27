@@ -37,11 +37,9 @@ jobs:
           
       - name: Build and push base
         run: |
-          echo "${{ secrets.GHCR_PAT }}" > github_token
           docker buildx build \
             --platform linux/arm64 \
             --provenance=false \
-            --secret id=github_token,src=github_token \
             --target base \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:base \
             --push \
