@@ -43,8 +43,8 @@ COPY task/handler.sh handler.sh
 LABEL org.opencontainers.image.source="https://github.com/ql4b/lambda-shell-runtime"
 LABEL org.opencontainers.image.version="${VERSION}"
 
-# tiny: add lamnda helper functions
-FROM base AS tiny
+# tiny: add lambda helper functions
+FROM ghcr.io/ql4b/lambda-shell-runtime:base AS tiny
 
 ARG VERSION
 ARG HTTP_CLI_VERSION
@@ -65,8 +65,12 @@ RUN pip3 install --no-cache-dir --target /tmp/awscurl awscurl && \
     find /tmp/awscurl -type f -name '*.pyc' -delete && \
     find /tmp/awscurl -type d -name '*.dist-info' -exec rm -rf {} +
 
-# micro: inclues awscurl
-FROM tiny AS micro
+# micro: includes awscurl
+FROM ghcr.io/ql4b/lambda-shell-runtime:base AS micro-base
+
+COPY task/helpers.sh helpers.sh
+
+FROM micro-base AS micro
 
 ARG VERSION
 ARG HTTP_CLI_VERSION
@@ -93,7 +97,11 @@ LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.http_cli_version="${HTTP_CLI_VERSION}"
 
 # full: includes aws-cli for complete AWS functionality
-FROM tiny AS full
+FROM ghcr.io/ql4b/lambda-shell-runtime:base AS full-base
+
+COPY task/helpers.sh helpers.sh
+
+FROM full-base AS full
 
 ARG VERSION
 ARG HTTP_CLI_VERSION

@@ -1,0 +1,86 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      HTTP_CLI_VERSION: v1.0.1
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm ci
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Create and use buildx builder
+        run: |
+          docker buildx create --name shell-runtime-builder --driver docker-container --use
+          docker buildx inspect shell-runtime-builder --bootstrap
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Set version
+        id: version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            # Get semantic version for main branch
+            VERSION=$(npx semantic-release --no-ci --dry-run --branch main 2>&1 | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+            if [ -z "$VERSION" ]; then
+              echo "No release needed"
+              echo "VERSION=develop" >> $GITHUB_ENV
+              echo "SHOULD_RELEASE=false" >> $GITHUB_ENV
+            else
+              echo "VERSION=$VERSION" >> $GITHUB_ENV
+              echo "SHOULD_RELEASE=true" >> $GITHUB_ENV
+            fi
+          else
+            # Use branch name for develop
+            echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "SHOULD_RELEASE=false" >> $GITHUB_ENV
+          fi
+          echo "Detected VERSION: $VERSION"
+      - name: Build and push images
+        run: |
+          echo "${{ secrets.GHCR_PAT }}" > github_token
+          export GITHUB_TOKEN="${{ secrets.GHCR_PAT }}"
+          
+          # Build and push all variants
+          make push VERSION="$VERSION" REGISTRY="ghcr.io/${{ github.repository_owner }}"
+        shell: bash
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
+      - name: Create release
+        if: env.SHOULD_RELEASE == 'true'
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
