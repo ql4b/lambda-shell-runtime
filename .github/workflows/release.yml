@@ -43,42 +43,57 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+      - name: Get version from semantic-release
+        id: version
+        run: |
+          VERSION=$(npx semantic-release --dry-run | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Build Docker images
         run: |              
           echo "${{ secrets.GHCR_PAT }}" > github_token
           export DOCKER_BUILDKIT=1
+          VERSION=$VERSION
+          IMAGE=ghcr.io/ql4b/lambda-shell-runtime
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
-            --output type=docker --progress=plain \
+            --build-arg HTTP_CLI_VERSION=$VERSION \
+            --output type=registry --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
-            -t lambda-shell-runtime:base -f base.Dockerfile .
+            -t $IMAGE:base-$VERSION \
+            -t $IMAGE:base-latest \
+            -f base.Dockerfile .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
-            --output type=docker --progress=plain \
+            --build-arg HTTP_CLI_VERSION=$VERSION \
+            --output type=registry --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
-            -t lambda-shell-runtime:tiny -f tiny.Dockerfile .
+            -t $IMAGE:tiny-$VERSION \
+            -t $IMAGE:tiny-latest \
+            -f tiny.Dockerfile .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
-            --output type=docker --progress=plain \
+            --build-arg HTTP_CLI_VERSION=$VERSION \
+            --output type=registry --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
-            -t lambda-shell-runtime:micro -f micro.Dockerfile .
+            -t $IMAGE:micro-$VERSION \
+            -t $IMAGE:micro-latest \
+            -f micro.Dockerfile .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
-            --output type=docker --progress=plain \
+            --build-arg HTTP_CLI_VERSION=$VERSION \
+            --output type=registry --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
-            -t lambda-shell-runtime:full -f Dockerfile .
+            -t $IMAGE:full-$VERSION \
+            -t $IMAGE:full-latest \
+            -f Dockerfile .
         shell: bash
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin

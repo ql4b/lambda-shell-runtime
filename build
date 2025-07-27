@@ -1,4 +1,3 @@
-
 #!/bin/sh
 
 set -ex
@@ -7,6 +6,7 @@ set -ex
 PLATFORM="linux/arm64"
 MODE="--load"
 TAG="lambda-shell-runtime"
+VERSION="${VERSION:-dev}"
 VARIANTS="base tiny micro full"
 
 # Parse arguments
@@ -40,10 +40,10 @@ while [ $# -gt 0 ]; do
 done
 
 for VARIANT in $VARIANTS; do
-  DOCKERFILE="./${VARIANT}.Dockerfile"
-  [ "$VARIANT" = "full" ] && DOCKERFILE="./Dockerfile"
+  DOCKERFILE="./Dockerfile"
+  TARGET="$VARIANT"
 
-  [ "$VARIANT" = "base" ] && MODE="--load"
+  [ "$VARIANT" = "base" ] && TARGET=""
 
   echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
   docker buildx build \
@@ -51,6 +51,13 @@ for VARIANT in $VARIANTS; do
     --secret id=github_token,env=GITHUB_TOKEN \
     --tag $TAG:$VARIANT \
     --file "$DOCKERFILE" \
+    ${TARGET:+--target "$TARGET"} \
     $MODE \
     .
+
+  if [ -n "$VERSION" ]; then
+    echo "Tagging $TAG:$VARIANT-$VERSION"
+    docker tag $TAG:$VARIANT $TAG:$VARIANT-$VERSION
+  fi
 done
+
