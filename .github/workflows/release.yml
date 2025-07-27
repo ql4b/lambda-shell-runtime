@@ -71,7 +71,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
             --output type=registry --progress=plain \
-            --secret id=github_token,src=github_token \
+            --secret id=github_token,env=GITHUB_TOKEN \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:base-$VERSION \
@@ -81,7 +81,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
             --output type=registry --progress=plain \
-            --secret id=github_token,src=github_token \
+            --secret id=github_token,env=GITHUB_TOKEN \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:tiny-$VERSION \
@@ -91,7 +91,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
             --output type=registry --progress=plain \
-            --secret id=github_token,src=github_token \
+            --secret id=github_token,env=GITHUB_TOKEN \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:micro-$VERSION \
@@ -101,7 +101,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
             --output type=registry --progress=plain \
-            --secret id=github_token,src=github_token \
+            --secret id=github_token,env=GITHUB_TOKEN \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:full-$VERSION \
