@@ -69,7 +69,8 @@ jobs:
           IMAGE=ghcr.io/ql4b/lambda-shell-runtime
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg HTTP_CLI_VERSION=$VERSION \
+            --build-arg VERSION="$VERSION" \
+            --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
             --output type=registry --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
@@ -79,7 +80,8 @@ jobs:
             --target base .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg HTTP_CLI_VERSION=$VERSION \
+            --build-arg VERSION="$VERSION" \
+            --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
             --output type=registry --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
@@ -89,7 +91,8 @@ jobs:
             --target tiny .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg HTTP_CLI_VERSION=$VERSION \
+            --build-arg VERSION="$VERSION" \
+            --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
             --output type=registry --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
@@ -99,7 +102,8 @@ jobs:
             --target micro .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg HTTP_CLI_VERSION=$VERSION \
+            --build-arg VERSION="$VERSION" \
+            --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
             --output type=registry --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
