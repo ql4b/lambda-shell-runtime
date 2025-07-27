@@ -45,6 +45,8 @@ for VARIANT in $VARIANTS; do
 
   [ "$VARIANT" = "base" ] && TARGET=""
 
+  [ "$VARIANT" = "base" ] && MODE="--load"
+
   echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
   docker buildx build \
     --platform "$PLATFORM" \

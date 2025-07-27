@@ -1,5 +1,6 @@
-FROM public.ecr.aws/lambda/provided:al2023 AS builder
+FROM lambda-shell-runtime:base AS tiny
 
+<<<<<<<< HEAD:base.Dockerfile
 ARG HTTP_CLI_VERSION=v1.0.1
 
 RUN dnf install -y unzip && \
@@ -36,3 +37,8 @@ COPY task/handler.sh handler.sh
 
 # Label for documentation/reference
 LABEL org.opencontainers.image.title="lambda-shell-runtime:base"
+========
+COPY task/helpers.sh helpers.sh
+
+LABEL org.opencontainers.image.title="lambda-shell-runtime:tiny"
+>>>>>>>> 09d81b0 (chore(ci): add base image build step to release workflow):tiny.Dockerfile
