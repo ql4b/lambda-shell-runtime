@@ -6,7 +6,6 @@ Implement AWS Lambda functions in Bash, packaged as OCI-compliant container imag
 
 Inspired by: https://docs.aws.amazon.com/lambda/latest/dg/runtimes-walkthrough.html
 
-
 This custom Lambda runtime enables Bash-based execution with minimal dependencies. We provide three image variants tailored to different needs:
 
 ## Runtime Image Variants

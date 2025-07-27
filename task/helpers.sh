@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html
-
-
 # https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html#apigateway-example-event
 # https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
 # https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format
