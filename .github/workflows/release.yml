@@ -49,20 +49,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-
-          echo "Running semantic-release dry-run to extract next version..."
-          VERSION=$(npx semantic-release --no-ci --dry-run 2>&1 | tee semantic-output.log | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+' || true)
-
+          VERSION=$(npx semantic-release --no-ci --dry-run --branch ${{ github.ref_name }} 2>&1 | tee semantic-output.log | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.]+)?' || true)
           if [ -z "$VERSION" ]; then
             echo "Failed to extract VERSION from semantic-release output:"
             cat semantic-output.log
             exit 1
           fi
-
           echo "Detected VERSION: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
       - name: Build Docker images
         run: |              
           echo "${{ secrets.GHCR_PAT }}" > github_token
@@ -72,7 +66,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg VERSION="$VERSION" \
             --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
-            --output type=registry --progress=plain \
+            --output type=docker --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
@@ -83,7 +77,7 @@ jobs:
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg VERSION="$VERSION" \
             --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
-            --output type=registry --progress=plain \
+            --output type=docker --progress=plain \
             --secret id=github_token,src=github_token \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache \
@@ -91,28 +85,30 @@ jobs:
             -t $IMAGE:tiny-latest \
             --target tiny .
 
-          docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg VERSION="$VERSION" \
-            --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
-            --output type=registry --progress=plain \
-            --secret id=github_token,src=github_token \
-            --cache-from type=local,src=/tmp/.buildx-cache \
-            --cache-to type=local,dest=/tmp/.buildx-cache \
-            -t $IMAGE:micro-$VERSION \
-            -t $IMAGE:micro-latest \
-            --target micro .
+          # docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
+          #   --build-arg VERSION="$VERSION" \
+          #   --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
+          #   --output type=docker --progress=plain \
+          #   --secret id=github_token,src=github_token \
+          #   --cache-from type=local,src=/tmp/.buildx-cache \
+          #   --cache-to type=local,dest=/tmp/.buildx-cache \
+          #   -t $IMAGE:micro-$VERSION \
+          #   -t $IMAGE:micro-latest \
+          #   --target micro .
 
-          docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
-            --build-arg VERSION="$VERSION" \
-            --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
-            --output type=registry --progress=plain \
-            --secret id=github_token,src=github_token \
-            --cache-from type=local,src=/tmp/.buildx-cache \
-            --cache-to type=local,dest=/tmp/.buildx-cache \
-            -t $IMAGE:full-$VERSION \
-            -t $IMAGE:full-latest \
+          # docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
+          #   --build-arg VERSION="$VERSION" \
+          #   --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
+          #   --output type=docker --progress=plain \
+          #   --secret id=github_token,src=github_token \
+          #   --cache-from type=local,src=/tmp/.buildx-cache \
+          #   --cache-to type=local,dest=/tmp/.buildx-cache \
+          #   -t $IMAGE:full-$VERSION \
+          #   -t $IMAGE:full-latest \
             .
         shell: bash
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
