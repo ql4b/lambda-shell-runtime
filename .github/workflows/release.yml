@@ -44,9 +44,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
       - name: Build Docker images
-        run: |
+        run: |              
           echo "${{ secrets.GHCR_PAT }}" > github_token
           export DOCKER_BUILDKIT=1
+
+          docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
+            --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
+            --output type=docker --progress=plain \
+            --secret id=github_token,src=github_token \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-to type=local,dest=/tmp/.buildx-cache \
+            -t lambda-shell-runtime:base -f base.Dockerfile .
+
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
             --output type=docker --progress=plain \

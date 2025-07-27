@@ -1,13 +1,13 @@
 
 #!/bin/sh
 
-set -e
+set -ex
 
 # Default config
 PLATFORM="linux/arm64"
 MODE="--load"
 TAG="lambda-shell-runtime"
-VARIANTS="tiny micro full"
+VARIANTS="base tiny micro full"
 
 # Parse arguments
 while [ $# -gt 0 ]; do
@@ -28,7 +28,7 @@ while [ $# -gt 0 ]; do
       MODE="--load"
       shift
       ;;
-    tiny|slim|full)
+    full|tiny|micro|base)
       VARIANTS="$1"
       shift
       ;;
@@ -42,6 +42,8 @@ done
 for VARIANT in $VARIANTS; do
   DOCKERFILE="./${VARIANT}.Dockerfile"
   [ "$VARIANT" = "full" ] && DOCKERFILE="./Dockerfile"
+
+  [ "$VARIANT" = "base" ] && MODE="--load"
 
   echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
   docker buildx build \
