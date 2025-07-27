@@ -55,15 +55,7 @@ LABEL org.opencontainers.image.title="lambda-shell-runtime:tiny"
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.http_cli_version="${HTTP_CLI_VERSION}"
 
-FROM public.ecr.aws/lambda/provided:al2023 AS awscurl-installer
 
-RUN dnf install -y unzip python3-pip  findutils && \
-    dnf clean all
-
-RUN pip3 install --no-cache-dir --target /tmp/awscurl awscurl && \
-    find /tmp/awscurl -type d -name '__pycache__' -exec rm -rf {} + && \
-    find /tmp/awscurl -type f -name '*.pyc' -delete && \
-    find /tmp/awscurl -type d -name '*.dist-info' -exec rm -rf {} +
 
 # micro: includes awscurl
 FROM ghcr.io/ql4b/lambda-shell-runtime:base AS micro-base
@@ -79,8 +71,7 @@ RUN dnf install -y python3 && \
     dnf clean all && \
     rm -rf /var/cache/dnf
 
-COPY --from=awscurl-installer /tmp/awscurl /var/task/aws
-# Clean up Python cache and metadata
+COPY --from=ghcr.io/ql4b/lambda-shell-runtime:awscurl-installer /tmp/awscurl /var/task/aws
 RUN rm -rf \
   /var/task/aws/__pycache__ \
   /var/task/aws/*.dist-info \
@@ -106,10 +97,7 @@ FROM full-base AS full
 ARG VERSION
 ARG HTTP_CLI_VERSION
 
-RUN dnf install -y \
-    aws-cli  && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf   
+COPY --from=ghcr.io/ql4b/lambda-shell-runtime:awscli-installer /usr/bin/aws /usr/bin/aws   
 
 LABEL org.opencontainers.image.title="lambda-shell-runtime:full"
 LABEL org.opencontainers.image.version="${VERSION}"
