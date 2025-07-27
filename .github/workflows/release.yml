@@ -76,7 +76,7 @@ jobs:
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:base-$VERSION \
             -t $IMAGE:base-latest \
-            -f base.Dockerfile .
+            --target base .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
@@ -86,7 +86,7 @@ jobs:
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:tiny-$VERSION \
             -t $IMAGE:tiny-latest \
-            -f tiny.Dockerfile .
+            --target tiny .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
@@ -96,7 +96,7 @@ jobs:
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:micro-$VERSION \
             -t $IMAGE:micro-latest \
-            -f micro.Dockerfile .
+            --target micro .
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
             --build-arg HTTP_CLI_VERSION=$VERSION \
@@ -106,7 +106,7 @@ jobs:
             --cache-to type=local,dest=/tmp/.buildx-cache \
             -t $IMAGE:full-$VERSION \
             -t $IMAGE:full-latest \
-            -f Dockerfile .
+            .
         shell: bash
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
