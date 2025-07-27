@@ -41,7 +41,7 @@ for VARIANT in $VARIANTS; do
   DOCKERFILE="./Dockerfile"
   TARGET="$VARIANT"
 
-  [ "$VARIANT" = "base" ] && TARGET=""
+  [ "$VARIANT" = "base" ] && TARGET="base"
 
   echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
   

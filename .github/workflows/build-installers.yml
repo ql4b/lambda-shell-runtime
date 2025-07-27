@@ -11,6 +11,10 @@ on:
     paths:
       - 'Dockerfile'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-installers:
     runs-on: ubuntu-latest

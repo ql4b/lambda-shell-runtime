@@ -14,6 +14,10 @@ permissions:
   issues: write
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -78,8 +82,6 @@ jobs:
           # Build and push all variants
           make push VERSION="$VERSION" REGISTRY="ghcr.io/${{ github.repository_owner }}"
         shell: bash
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
       - name: Create release
         if: env.SHOULD_RELEASE == 'true'
         run: npx semantic-release

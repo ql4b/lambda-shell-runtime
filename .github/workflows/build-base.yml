@@ -15,6 +15,10 @@ on:
       - 'runtime/**'
       - 'task/handler.sh'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-base:
     runs-on: ubuntu-latest
@@ -33,6 +37,13 @@ jobs:
           
       - name: Build and push base
         run: |
-          ./build --platform linux/arm64 --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime --push base
+          docker buildx build \
+            --platform linux/arm64 \
+            --provenance=false \
+            --secret id=github_token,env=GITHUB_TOKEN \
+            --target base \
+            --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:base \
+            --push \
+            .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
