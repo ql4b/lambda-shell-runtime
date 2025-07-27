@@ -61,11 +61,12 @@ jobs:
 
           echo "Detected VERSION: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
       - name: Build Docker images
         run: |              
           echo "${{ secrets.GHCR_PAT }}" > github_token
           export DOCKER_BUILDKIT=1
-          VERSION=$VERSION
           IMAGE=ghcr.io/ql4b/lambda-shell-runtime
 
           docker buildx build --builder shell-runtime-builder --platform linux/arm64 \
@@ -112,8 +113,6 @@ jobs:
             -t $IMAGE:full-latest \
             .
         shell: bash
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
       - run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
