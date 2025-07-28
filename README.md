@@ -44,9 +44,9 @@ Choose the variant that matches your requirements:
 
 | Variant | Size | Tools Included | Best For |
 |---------|------|----------------|----------|
-| **`tiny`** | ~50MB | `jq`, `curl`, `http-cli` | HTTP APIs, JSON processing |
-| **`micro`** | ~80MB | `tiny` + `awscurl` | AWS API calls without full CLI |
-| **`full`** | ~200MB | `micro` + AWS CLI | Complete AWS operations |
+| **`tiny`** | ~132MB | `jq`, `curl`, `http-cli` | HTTP APIs, JSON processing |
+| **`micro`** | ~221MB | `tiny` + `awscurl` | AWS API calls without full CLI |
+| **`full`** | ~417MB | `tiny` + AWS CLI | Complete AWS operations |
 
 ### Available Images
 
@@ -217,8 +217,21 @@ cd lambda-shell-runtime
 - **Cold start**: ~100-300ms depending on variant
 - **Memory usage**: 64MB minimum recommended
 - **Timeout**: Standard Lambda limits apply (15 minutes max)
-- **Package size**: Varies by variant (50MB-200MB)
+- **Package size**: Varies by variant (132MB-417MB)
 - **Concurrent executions**: Standard Lambda limits
+
+### Size Comparison with Official AWS Lambda Runtimes
+
+| Runtime | Size | Notes |
+|---------|------|-------|
+| **AWS Python 3.12** | 534MB | Official Python runtime |
+| **lambda-shell-runtime:full** | 417MB | **22% smaller** with complete AWS CLI |
+| **AWS Node.js 20** | 410MB | Official Node.js runtime |
+| **lambda-shell-runtime:micro** | 221MB | **46% smaller** with AWS API access |
+| **lambda-shell-runtime:tiny** | 132MB | **75% smaller** with essential tools |
+| **AWS provided** | 128MB | Bare custom runtime base |
+
+The shell runtime is **highly competitive** with official runtimes while providing the simplicity and power of Bash scripting.
 
 ## Troubleshooting
 
