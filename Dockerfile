@@ -96,7 +96,9 @@ FROM full-base AS full
 ARG VERSION
 ARG HTTP_CLI_VERSION
 
-COPY --from=ghcr.io/ql4b/lambda-shell-runtime:awscli-installer /usr/bin/aws /usr/bin/aws   
+RUN dnf install -y awscli-2 && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf   
 
 LABEL org.opencontainers.image.title="lambda-shell-runtime:full"
 LABEL org.opencontainers.image.version="${VERSION}"
