@@ -41,6 +41,14 @@ COPY task/handler.sh handler.sh
 
 LABEL org.opencontainers.image.source="https://github.com/ql4b/lambda-shell-runtime"
 LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.title="Lambda Shell Runtime"
+LABEL org.opencontainers.image.description="Custom AWS Lambda runtime for executing Bash functions as serverless applications"
+LABEL org.opencontainers.image.url="https://github.com/ql4b/lambda-shell-runtime"
+LABEL org.opencontainers.image.documentation="https://github.com/ql4b/lambda-shell-runtime#readme"
+LABEL org.opencontainers.image.vendor="QL4B"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.authors="QL4B <https://github.com/ql4b>"
+LABEL maintainer="QL4B <https://github.com/ql4b>"
 
 # tiny: add lambda helper functions
 FROM ghcr.io/ql4b/lambda-shell-runtime:base AS tiny
