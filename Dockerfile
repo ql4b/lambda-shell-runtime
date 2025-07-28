@@ -54,14 +54,8 @@ LABEL org.opencontainers.image.title="lambda-shell-runtime:tiny"
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.http_cli_version="${HTTP_CLI_VERSION}"
 
-
-
 # micro: includes awscurl
-FROM ghcr.io/ql4b/lambda-shell-runtime:base AS micro-base
-
-COPY task/helpers.sh helpers.sh
-
-FROM micro-base AS micro
+FROM tiny AS micro
 
 ARG VERSION
 ARG HTTP_CLI_VERSION
@@ -87,11 +81,7 @@ LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.http_cli_version="${HTTP_CLI_VERSION}"
 
 # full: includes aws-cli for complete AWS functionality
-FROM ghcr.io/ql4b/lambda-shell-runtime:base AS full-base
-
-COPY task/helpers.sh helpers.sh
-
-FROM full-base AS full
+FROM tiny AS full
 
 ARG VERSION
 ARG HTTP_CLI_VERSION
