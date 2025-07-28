@@ -23,7 +23,7 @@ Custom AWS Lambda runtime for executing Bash functions as serverless application
 
 ```bash
 # handler.sh
-hello() {
+main () {
     local event="$1"
     echo '{"message": "Hello from Bash Lambda!", "input": '"$event"'}'
 }
@@ -142,6 +142,7 @@ aws lambda create-function \
   --code ImageUri=123456789012.dkr.ecr.region.amazonaws.com/my-lambda:latest \
   --role arn:aws:iam::123456789012:role/lambda-execution-role \
   --package-type Image \
+  --architectures arm64 \
   --timeout 30
 ```
 
@@ -161,17 +162,14 @@ resource "aws_lambda_function" "bash_function" {
 
 ### Using Lambda Runtime Interface Emulator
 
-```bash
-# Download RIE (one time setup)
-mkdir -p ~/.aws-lambda-rie
-curl -Lo ~/.aws-lambda-rie/aws-lambda-rie \
-  https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie
-chmod +x ~/.aws-lambda-rie/aws-lambda-rie
+https://github.com/aws/aws-lambda-runtime-interface-emulator/
 
+The emulator is already available on the image, you just need to override the `entrypoint` to run test your lambda locally
+
+```
 # Run your function locally
 docker run --rm -p 9000:8080 \
-  -v ~/.aws-lambda-rie:/aws-lambda \
-  -e HANDLER="handler.hello" \
+  --env _HANDLER="handler.hello" \
   --entrypoint /aws-lambda/aws-lambda-rie \
   my-lambda:latest /var/runtime/bootstrap
 
@@ -180,15 +178,6 @@ curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
   -d '{"name": "World"}'
 ```
 
-### Debug Mode
-
-```bash
-# Run with debug output
-docker run --rm -p 9000:8080 \
-  -e HANDLER="handler.hello" \
-  -e _LAMBDA_RUNTIME_DEBUG=1 \
-  my-lambda:latest
-```
 
 ## Building from Source
 
@@ -239,8 +228,8 @@ The shell runtime is **highly competitive** with official runtimes while providi
 
 **Function not found:**
 ```bash
-# Ensure your function is defined and handler matches
-HANDLER="handler.my_function"  # filename.function_name
+# Ensure your function is defined and you override 
+# the CMD hander.my_function
 ```
 
 **Permission errors:**
