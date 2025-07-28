@@ -24,12 +24,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
+      - name: Log in to Public ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
           
       - name: Build and push installers
         run: |
@@ -39,6 +47,7 @@ jobs:
             --provenance=false \
             --target awscurl-installer \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:awscurl-installer \
+            --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:awscurl-installer \
             --push \
             -f - . << 'EOF'
           FROM public.ecr.aws/lambda/provided:al2023 AS awscurl-installer
@@ -55,6 +64,7 @@ jobs:
             --provenance=false \
             --target awscli-installer \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:awscli-installer \
+            --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:awscli-installer \
             --push \
             -f - . << 'EOF'
           FROM public.ecr.aws/lambda/provided:al2023 AS awscli-installer

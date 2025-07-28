@@ -31,15 +31,24 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Log in to Public ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - name: Build and push base
         run: |
           echo "${{ secrets.GHCR_PAT }}" > github_token
           docker buildx build \
-            --platform linux/arm64 \
+            --platform linux/arm64,linux/amd64 \
             --provenance=false \
             --secret id=github_token,src=github_token \
             --target base \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:base \
+            --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:base \
             --push \
             .
         env:
@@ -99,15 +108,35 @@ jobs:
             echo "SHOULD_RELEASE=false" >> $GITHUB_ENV
           fi
           echo "Detected VERSION: $VERSION"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u skunxicat --password-stdin
+      - name: Log in to Public ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - name: Build and push images
         run: |
           echo "${{ secrets.GHCR_PAT }}" > github_token
           export GITHUB_TOKEN="${{ secrets.GHCR_PAT }}"
           
-          # Build and push all variants
-          make push VERSION="$VERSION" REGISTRY="ghcr.io/${{ github.repository_owner }}"
+          # Build and push to both registries
+          ./build-enhanced --push --ghcr --public-ecr --platform linux/arm64,linux/amd64 tiny micro full
+          
+          # Also tag latest for main branch releases
+          if [ "${{ github.ref_name }}" = "main" ] && [ "$SHOULD_RELEASE" = "true" ]; then
+            for VARIANT in tiny micro full; do
+              docker buildx imagetools create \
+                ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:$VARIANT \
+                --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:$VARIANT-latest
+              docker buildx imagetools create \
+                public.ecr.aws/j5r7n1v7/lambda-shell-runtime:$VARIANT \
+                --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:$VARIANT-latest
+            done
+          fi
         shell: bash
       - name: Create release
         if: env.SHOULD_RELEASE == 'true'
