@@ -1,0 +1,17 @@
+# Docker artifacts
+*.tar
+*.tar.gz
+*.tar.xz
+*.tgz
+*.img
+
+# Build output
+.DS_Store
+build/
+dist/
+*.log
+node_modules/
+
+# VSCode settings
+.vscode/
+#examples/
