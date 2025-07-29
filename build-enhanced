@@ -1,0 +1,93 @@
+#!/bin/sh
+
+set -e
+
+# Default config
+PLATFORM="linux/arm64"
+MODE="--load"
+TAG="lambda-shell-runtime"
+VERSION="${VERSION:-develop}"
+VARIANTS="base tiny micro full"
+REGISTRIES=""
+
+# Parse arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --platform)
+      PLATFORM="$2"
+      shift 2
+      ;;
+    --tag)
+      TAG="$2"
+      shift 2
+      ;;
+    --push)
+      MODE="--push"
+      shift
+      ;;
+    --load)
+      MODE="--load"
+      shift
+      ;;
+    --registry)
+      REGISTRIES="$REGISTRIES $2"
+      shift 2
+      ;;
+    --ghcr)
+      REGISTRIES="$REGISTRIES ghcr.io/ql4b"
+      shift
+      ;;
+    --public-ecr)
+      REGISTRIES="$REGISTRIES public.ecr.aws/j5r7n1v7"
+      shift
+      ;;
+    *)
+      # Remaining arguments are variants
+      VARIANTS="$*"
+      break
+      ;;
+  esac
+done
+
+for VARIANT in $VARIANTS; do
+  DOCKERFILE="./Dockerfile"
+  TARGET="$VARIANT"
+
+  [ "$VARIANT" = "base" ] && TARGET="base"
+
+  echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
+  
+  # Build tags
+  if [ "$MODE" = "--push" ] && [ -n "$REGISTRIES" ]; then
+    # For push mode, only use registry tags
+    TAGS=""
+    for REGISTRY in $REGISTRIES; do
+      TAGS="$TAGS --tag $REGISTRY/$TAG:$VARIANT"
+      if [ -n "$VERSION" ]; then
+        TAGS="$TAGS --tag $REGISTRY/$TAG:$VARIANT-$VERSION"
+      fi
+    done
+  else
+    # For load mode, use local tags
+    TAGS="--tag $TAG:$VARIANT"
+    if [ -n "$VERSION" ]; then
+      TAGS="$TAGS --tag $TAG:$VARIANT-$VERSION"
+    fi
+  fi
+  
+  docker buildx build \
+    --platform "$PLATFORM" \
+    --provenance=false \
+    --secret id=github_token,env=GITHUB_TOKEN \
+    $TAGS \
+    --file "$DOCKERFILE" \
+    ${TARGET:+--target "$TARGET"} \
+    $MODE \
+    .
+
+  # Only do local tagging for --load mode if version wasn't already tagged
+  if [ -n "$VERSION" ] && [ "$MODE" = "--load" ]; then
+    echo "Tagging $TAG:$VARIANT-$VERSION"
+    docker tag $TAG:$VARIANT $TAG:$VARIANT-$VERSION
+  fi
+done
