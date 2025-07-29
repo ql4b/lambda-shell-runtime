@@ -8,6 +8,7 @@ on:
   pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: write
@@ -57,6 +58,7 @@ jobs:
   build:
     needs: build-base
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false || github.event_name != 'pull_request'
     env:
       HTTP_CLI_VERSION: v1.0.1
     steps:
