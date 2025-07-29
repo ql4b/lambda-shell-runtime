@@ -58,8 +58,6 @@ ARG HTTP_CLI_VERSION
 
 COPY task/helpers.sh helpers.sh
 
-CMD ["handler.main"]
-
 LABEL org.opencontainers.image.title="lambda-shell-runtime:tiny"
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.http_cli_version="${HTTP_CLI_VERSION}"
