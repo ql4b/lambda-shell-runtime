@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# https://docs.aws.amazon.com/lambda/latest/dg/runtimes-walkthrough.html
+# https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html
+
+set -eo pipefail
+
+# Function to send initialization error
+send_init_error() {
+  local error_message="$1"
+  curl -sS -X POST \
+    "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/init/error" \
+    -H "Content-Type: application/json" \
+    -d '{"errorMessage": "'"$error_message"'", "errorType": "Runtime.InitError"}'
+  exit 1
+}
+
+# Function to send invocation error
+send_invocation_error() {
+  local request_id="$1"
+  local error_message="$2"
+  curl -sS -X POST \
+    "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/${request_id}/error" \
+    -H "Content-Type: application/json" \
+    -d '{"errorMessage": "'"$error_message"'", "errorType": "Runtime.HandlerError"}'
+}
+
+# Initialization - load function handler
+if [ -z "$_HANDLER" ]; then
+  send_init_error "Handler not specified"
+fi
+
+HANDLER_FILE="$(echo $_HANDLER | cut -d. -f1).sh"
+HANDLER_FUNC="$(echo $_HANDLER | cut -d. -f2)"
+
+if [ ! -f "$LAMBDA_TASK_ROOT/$HANDLER_FILE" ]; then
+  send_init_error "Handler file not found: $HANDLER_FILE"
+fi
+
+source "$LAMBDA_TASK_ROOT/$HANDLER_FILE" || send_init_error "Failed to source handler file: $HANDLER_FILE"
+
+# Check if handler function exists
+if ! type "$HANDLER_FUNC" >/dev/null 2>&1; then
+  send_init_error "Handler function not found: $HANDLER_FUNC"
+fi
+
+# Processing
+while true
+do
+  HEADERS="$(mktemp)"
+  # Get an event. The HTTP request will block until one is received
+  EVENT_DATA=$(curl -sS -LD "$HEADERS" "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/next")
+
+  # Extract request ID by scraping response headers received above
+  REQUEST_ID=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$HEADERS" | tr -d '[:space:]' | cut -d: -f2)
+
+  # Run the handler function from the script with error handling
+  if RESPONSE=$("$HANDLER_FUNC" "$EVENT_DATA" 2>&1); then
+    # Success - send response
+    echo "$RESPONSE" | curl -sS -X POST \
+      "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/${REQUEST_ID}/response" \
+      -H "Content-Type: application/json" \
+      -d @-
+  else
+    # Error - send error response
+    send_invocation_error "$REQUEST_ID" "Handler function failed: $RESPONSE"
+  fi
+  
+  rm -f "$HEADERS"
+done

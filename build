@@ -1,0 +1,70 @@
+#!/bin/sh
+
+set -e
+
+# Default config
+PLATFORM="linux/arm64"
+MODE="--load"
+TAG="lambda-shell-runtime"
+VERSION="${VERSION:-develop}"
+VARIANTS="base tiny micro full"
+# VARIANTS="base tiny"
+
+# Parse arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --platform)
+      PLATFORM="$2"
+      shift 2
+      ;;
+    --tag)
+      TAG="$2"
+      shift 2
+      ;;
+    --push)
+      MODE="--push"
+      shift
+      ;;
+    --load)
+      MODE="--load"
+      shift
+      ;;
+    *)
+      # Remaining arguments are variants
+      VARIANTS="$*"
+      break
+      ;;
+  esac
+done
+
+for VARIANT in $VARIANTS; do
+  DOCKERFILE="./Dockerfile"
+  TARGET="$VARIANT"
+
+  [ "$VARIANT" = "base" ] && TARGET="base"
+
+  echo "Building $VARIANT ($DOCKERFILE) with platform $PLATFORM..."
+  
+  # Build tags
+  TAGS="--tag $TAG:$VARIANT"
+  if [ -n "$VERSION" ]; then
+    TAGS="$TAGS --tag $TAG:$VARIANT-$VERSION"
+  fi
+  
+  docker buildx build \
+    --platform "$PLATFORM" \
+    --provenance=false \
+    --secret id=github_token,env=GITHUB_TOKEN \
+    $TAGS \
+    --file "$DOCKERFILE" \
+    ${TARGET:+--target "$TARGET"} \
+    $MODE \
+    .
+
+  # Only do local tagging for --load mode if version wasn't already tagged
+  if [ -n "$VERSION" ] && [ "$MODE" = "--load" ]; then
+    echo "Tagging $TAG:$VARIANT-$VERSION"
+    docker tag $TAG:$VARIANT $TAG:$VARIANT-$VERSION
+  fi
+done
+
