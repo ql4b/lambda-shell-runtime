@@ -91,7 +91,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # For PRs, use pr-NUMBER format
+            echo "VERSION=pr-${{ github.event.number }}" >> $GITHUB_ENV
+            echo "SHOULD_RELEASE=false" >> $GITHUB_ENV
+          elif [ "${{ github.ref_name }}" = "main" ]; then
             # Get semantic version for main branch
             VERSION=$(npx semantic-release --no-ci --dry-run --branch main 2>&1 | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
             if [ -z "$VERSION" ]; then
@@ -103,8 +107,9 @@ jobs:
               echo "SHOULD_RELEASE=true" >> $GITHUB_ENV
             fi
           else
-            # Use branch name for develop
-            echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+            # Use branch name for develop (sanitize it)
+            CLEAN_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9.-]/-/g')
+            echo "VERSION=$CLEAN_BRANCH" >> $GITHUB_ENV
             echo "SHOULD_RELEASE=false" >> $GITHUB_ENV
           fi
           echo "Detected VERSION: $VERSION"
@@ -123,8 +128,14 @@ jobs:
           echo "${{ secrets.GHCR_PAT }}" > github_token
           export GITHUB_TOKEN="${{ secrets.GHCR_PAT }}"
           
-          # Build and push to both registries
-          ./build-enhanced --push --ghcr --public-ecr --platform linux/arm64,linux/amd64 tiny micro full
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # For PRs, only build (don't push)
+            echo "PR build - testing only, not pushing"
+            ./build-enhanced --load --platform linux/arm64 tiny micro full
+          else
+            # For push events, build and push to both registries
+            ./build-enhanced --push --ghcr --public-ecr --platform linux/arm64,linux/amd64 tiny micro full
+          fi
           
           # Also tag latest for main branch releases
           if [ "${{ github.ref_name }}" = "main" ] && [ "$SHOULD_RELEASE" = "true" ]; then
