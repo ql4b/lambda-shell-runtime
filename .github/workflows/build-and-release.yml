@@ -22,6 +22,8 @@ concurrency:
 jobs:
   build-base:
     runs-on: ubuntu-latest
+    env:
+      HTTP_CLI_VERSION: v1.1.0
     steps:
       - uses: actions/checkout@v3
       - name: Set up Docker Buildx
@@ -47,6 +49,7 @@ jobs:
             --platform linux/arm64,linux/amd64 \
             --provenance=false \
             --secret id=github_token,src=github_token \
+            --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
             --target base \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:base \
             --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:base \
@@ -60,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false || github.event_name != 'pull_request'
     env:
-      HTTP_CLI_VERSION: v1.0.1
+      HTTP_CLI_VERSION: v1.1.0
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
