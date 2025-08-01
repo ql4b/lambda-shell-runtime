@@ -18,6 +18,8 @@ concurrency:
 jobs:
   build-installers:
     runs-on: ubuntu-latest
+    env:
+      HTTP_CLI_VERSION: v1.1.0
     steps:
       - uses: actions/checkout@v4
       

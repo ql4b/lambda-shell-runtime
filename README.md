@@ -244,6 +244,30 @@ The shell runtime is **highly competitive** with official runtimes while providi
 # Optimize shell script performance
 ```
 
+## Updating http-cli Version
+
+The runtime includes [http-cli](https://github.com/ql4b/http-cli) for simplified HTTP operations. To update to a newer version:
+
+1. **Update version in all configuration files:**
+   - `.github/workflows/build-and-release.yml` (2 locations)
+   - `.github/workflows/build-base.yml`
+   - `.github/workflows/build-installers.yml`
+   - `Dockerfile` (ARG HTTP_CLI_VERSION)
+   - `build-enhanced` script (default value)
+
+2. **Trigger a new build:**
+   ```bash
+   # Push changes to trigger GitHub Actions
+   git add .
+   git commit -m "Update http-cli to vX.X.X"
+   git push origin develop
+   ```
+
+3. **Or build locally:**
+   ```bash
+   HTTP_CLI_VERSION=v1.2.0 ./build-enhanced --load tiny
+   ```
+
 ## Contributing
 
 We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for details.

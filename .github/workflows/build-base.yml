@@ -28,6 +28,8 @@ concurrency:
 jobs:
   build-base:
     runs-on: ubuntu-latest
+    env:
+      HTTP_CLI_VERSION: v1.1.0
     steps:
       - uses: actions/checkout@v4
       
@@ -48,6 +50,7 @@ jobs:
             --platform linux/arm64 \
             --provenance=false \
             --secret id=github_token,src=github_token \
+            --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
             --target base \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:base \
             --push \

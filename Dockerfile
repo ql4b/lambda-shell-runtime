@@ -1,6 +1,6 @@
 FROM public.ecr.aws/lambda/provided:al2023 AS builder
 
-ARG HTTP_CLI_VERSION=v1.0.1
+ARG HTTP_CLI_VERSION=v1.1.0
 
 RUN dnf install -y unzip && \
     dnf clean all
