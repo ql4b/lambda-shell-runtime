@@ -7,6 +7,7 @@ PLATFORM="linux/arm64"
 MODE="--load"
 TAG="lambda-shell-runtime"
 VERSION="${VERSION:-develop}"
+HTTP_CLI_VERSION="${HTTP_CLI_VERSION:-v1.0.1}"
 VARIANTS="base tiny micro full"
 REGISTRIES=""
 
@@ -79,6 +80,8 @@ for VARIANT in $VARIANTS; do
     --platform "$PLATFORM" \
     --provenance=false \
     --secret id=github_token,env=GITHUB_TOKEN \
+    --build-arg VERSION="$VERSION" \
+    --build-arg HTTP_CLI_VERSION="$HTTP_CLI_VERSION" \
     $TAGS \
     --file "$DOCKERFILE" \
     ${TARGET:+--target "$TARGET"} \
