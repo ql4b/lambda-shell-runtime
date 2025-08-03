@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # https://docs.aws.amazon.com/lambda/latest/dg/runtimes-walkthrough.html
 # https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html
@@ -33,6 +33,13 @@ fi
 HANDLER_FILE="$(echo $_HANDLER | cut -d. -f1).sh"
 HANDLER_FUNC="$(echo $_HANDLER | cut -d. -f2)"
 
+echo "HANDLER_FILE: $HANDLER_FILE" >&2
+echo "HANDLER_FUNC: $HANDLER_FUNC" >&2
+echo "LAMBDA_TASK_ROOT: $LAMBDA_TASK_ROOT" >&2
+echo "AWS_LAMBDA_RUNTIME_API: $AWS_LAMBDA_RUNTIME_API" >&2
+echo "Sourcing $LAMBDA_TASK_ROOT/$HANDLER_FILE" >&2
+
+
 if [ ! -f "$LAMBDA_TASK_ROOT/$HANDLER_FILE" ]; then
   send_init_error "Handler file not found: $HANDLER_FILE"
 fi
@@ -55,7 +62,8 @@ do
   REQUEST_ID=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$HEADERS" | tr -d '[:space:]' | cut -d: -f2)
 
   # Run the handler function from the script with error handling
-  if RESPONSE=$("$HANDLER_FUNC" "$EVENT_DATA" 2>&1); then
+  # Let stderr go to CloudWatch logs, only capture stdout as response
+  if RESPONSE=$("$HANDLER_FUNC" "$EVENT_DATA"); then
     # Success - send response
     echo "$RESPONSE" | curl -sS -X POST \
       "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/${REQUEST_ID}/response" \
@@ -63,7 +71,7 @@ do
       -d @-
   else
     # Error - send error response
-    send_invocation_error "$REQUEST_ID" "Handler function failed: $RESPONSE"
+    send_invocation_error "$REQUEST_ID" "Handler function failed with exit code $?"
   fi
   
   rm -f "$HEADERS"
