@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/ql4b/lambda-shell-runtime/compare/v1.0.0...v1.1.0) (2025-08-07)
+
+
+### Features
+
+* debugging semantic ([b12f910](https://github.com/ql4b/lambda-shell-runtime/commit/b12f910cdfe52ace0efe209f3bd91b53fce451b6))
+
 # 1.0.0 (2025-08-07)
 
 
