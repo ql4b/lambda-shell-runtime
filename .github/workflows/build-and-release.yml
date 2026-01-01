@@ -52,7 +52,7 @@ jobs:
             --build-arg HTTP_CLI_VERSION=${{ env.HTTP_CLI_VERSION }} \
             --target base \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:base \
-            --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:base \
+            --tag public.ecr.aws/l9f6r9f5/lambda-shell-runtime:base \
             --push \
             .
         env:
@@ -149,8 +149,8 @@ jobs:
                 ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:$VARIANT \
                 --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:$VARIANT-latest
               docker buildx imagetools create \
-                public.ecr.aws/j5r7n1v7/lambda-shell-runtime:$VARIANT \
-                --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:$VARIANT-latest
+                public.ecr.aws/l9f6r9f5/lambda-shell-runtime:$VARIANT \
+                --tag public.ecr.aws/l9f6r9f5/lambda-shell-runtime:$VARIANT-latest
             done
           fi
         shell: bash
