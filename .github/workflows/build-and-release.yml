@@ -160,3 +160,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
+
+      - name: Update ECR Public Gallery catalog
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          aws ecr-public put-repository-catalog-data \
+            --region us-east-1 \
+            --repository-name lambda-shell-runtime \
+            --catalog-data file://catalog.json
