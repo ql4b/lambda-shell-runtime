@@ -39,7 +39,7 @@ while [ $# -gt 0 ]; do
       shift
       ;;
     --public-ecr)
-      REGISTRIES="$REGISTRIES public.ecr.aws/j5r7n1v7"
+      REGISTRIES="$REGISTRIES public.ecr.aws/l9f6r9f5"
       shift
       ;;
     *)

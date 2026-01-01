@@ -49,7 +49,7 @@ jobs:
             --provenance=false \
             --target awscurl-installer \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:awscurl-installer \
-            --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:awscurl-installer \
+            --tag public.ecr.aws/l9f6r9f5/lambda-shell-runtime:awscurl-installer \
             --push \
             -f - . << 'EOF'
           FROM public.ecr.aws/lambda/provided:al2023 AS awscurl-installer
@@ -66,7 +66,7 @@ jobs:
             --provenance=false \
             --target awscli-installer \
             --tag ghcr.io/${{ github.repository_owner }}/lambda-shell-runtime:awscli-installer \
-            --tag public.ecr.aws/j5r7n1v7/lambda-shell-runtime:awscli-installer \
+            --tag public.ecr.aws/l9f6r9f5/lambda-shell-runtime:awscli-installer \
             --push \
             -f - . << 'EOF'
           FROM public.ecr.aws/lambda/provided:al2023 AS awscli-installer

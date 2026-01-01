@@ -57,9 +57,9 @@ ghcr.io/ql4b/lambda-shell-runtime:micro
 ghcr.io/ql4b/lambda-shell-runtime:full
 
 # From AWS Public ECR
-public.ecr.aws/j5r7n1v7/lambda-shell-runtime:tiny
-public.ecr.aws/j5r7n1v7/lambda-shell-runtime:micro
-public.ecr.aws/j5r7n1v7/lambda-shell-runtime:full
+public.ecr.aws/l9f6r9f5/lambda-shell-runtime:tiny
+public.ecr.aws/l9f6r9f5/lambda-shell-runtime:micro
+public.ecr.aws/l9f6r9f5/lambda-shell-runtime:full
 ```
 
 ## Examples
