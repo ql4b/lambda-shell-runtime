@@ -1,0 +1,29 @@
+version: 2
+updates:
+  # Release toolchain (semantic-release + conventional-changelog).
+  # All deps are devDependencies; the runtime is shell with no Node runtime
+  # deps. Group every bump into a single weekly PR to keep noise low and to
+  # keep the toolchain current (which prevents advisories like the handlebars
+  # criticals from re-accruing).
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      release-toolchain:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "chore(ci)"
